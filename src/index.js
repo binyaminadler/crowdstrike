@@ -80,7 +80,7 @@ function processTimestamp(timestamp, deploymentStates, policyMap, scalingDecisio
     const aboveThreshold = avgCpu > policy.threshold;
     const belowThreshold = avgCpu < policy.threshold;
 
-    // Update detection timestamps
+    // Update detection timestamps (always, even during cooldown)
     if (aboveThreshold) {
       if (state.scaleUpDetectedAt === null) {
         state.scaleUpDetectedAt = timestamp;
@@ -92,21 +92,19 @@ function processTimestamp(timestamp, deploymentStates, policyMap, scalingDecisio
       }
       state.scaleUpDetectedAt = null;
     } else {
-      // exactly at threshold — reset both
       state.scaleUpDetectedAt = null;
       state.scaleDownDetectedAt = null;
     }
 
-    // Check cooldown
-    if (state.cooldownUntil !== null && tsMs < new Date(state.cooldownUntil).getTime()) {
-      continue;
-    }
-    // If cooldown just expired, clear it
+    // Determine if cooldown is still active
+    const inCooldown = state.cooldownUntil !== null && tsMs < new Date(state.cooldownUntil).getTime();
     if (state.cooldownUntil !== null && tsMs >= new Date(state.cooldownUntil).getTime()) {
       state.cooldownUntil = null;
     }
 
-    // Check scale-up stabilization window
+    if (inCooldown) continue;
+
+    // Check scale-up: stabilization window elapsed since first detection
     if (state.scaleUpDetectedAt !== null) {
       const detectedMs = new Date(state.scaleUpDetectedAt).getTime();
       if (tsMs - detectedMs >= policy.scaleUpWindow * 1000) {
@@ -123,7 +121,7 @@ function processTimestamp(timestamp, deploymentStates, policyMap, scalingDecisio
       }
     }
 
-    // Check scale-down stabilization window
+    // Check scale-down: stabilization window elapsed since first detection
     if (state.scaleDownDetectedAt !== null) {
       const detectedMs = new Date(state.scaleDownDetectedAt).getTime();
       if (tsMs - detectedMs >= policy.scaleDownWindow * 1000) {

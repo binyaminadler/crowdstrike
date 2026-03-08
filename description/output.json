@@ -1,0 +1,586 @@
+[
+  {
+    "timestamp": "2025-11-04T10:00:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.3,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:01:34Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.6,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:02:00Z",
+    "namespace": "production",
+    "deployment": "payment-service",
+    "action": "scaleUp",
+    "averageCPU": 55,
+    "reason": "CPU > 40% for 120 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:02:30Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleDown",
+    "averageCPU": 53,
+    "reason": "CPU < 70% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:02:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.5,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:04:18Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:05:04Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.2,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:06:00Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleDown",
+    "averageCPU": 57.7,
+    "reason": "CPU < 70% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:06:14Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.3,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:07:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:09:30Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleDown",
+    "averageCPU": 62.5,
+    "reason": "CPU < 70% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:09:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.5,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:10:12Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:11:18Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.2,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:13:00Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleDown",
+    "averageCPU": 67.2,
+    "reason": "CPU < 70% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:13:00Z",
+    "namespace": "production",
+    "deployment": "payment-service",
+    "action": "scaleUp",
+    "averageCPU": 46.8,
+    "reason": "CPU > 40% for 120 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:13:14Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.7,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:13:57Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:14:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.2,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:16:30Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleUp",
+    "averageCPU": 71.5,
+    "reason": "CPU > 70% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:16:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.8,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:17:27Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:18:18Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:20:00Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleUp",
+    "averageCPU": 73.2,
+    "reason": "CPU > 70% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:20:14Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.8,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:20:57Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:21:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.2,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:23:30Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleUp",
+    "averageCPU": 73,
+    "reason": "CPU > 70% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:23:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.8,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:24:00Z",
+    "namespace": "production",
+    "deployment": "payment-service",
+    "action": "scaleUp",
+    "averageCPU": 46.2,
+    "reason": "CPU > 40% for 120 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:24:27Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:25:18Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.2,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:27:00Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleUp",
+    "averageCPU": 71.6,
+    "reason": "CPU > 70% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:27:14Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.8,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:27:57Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:28:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:30:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.7,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:31:27Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:32:14Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleDown",
+    "averageCPU": 68.6,
+    "reason": "CPU < 70% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:32:18Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.2,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:34:14Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.8,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:34:57Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:35:00Z",
+    "namespace": "production",
+    "deployment": "payment-service",
+    "action": "scaleUp",
+    "averageCPU": 46,
+    "reason": "CPU > 40% for 120 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:35:44Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleDown",
+    "averageCPU": 67.9,
+    "reason": "CPU < 70% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:35:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.2,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:37:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.8,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:38:27Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:39:14Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleDown",
+    "averageCPU": 68,
+    "reason": "CPU < 70% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:39:18Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:41:14Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.7,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:41:57Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:42:44Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleDown",
+    "averageCPU": 69,
+    "reason": "CPU < 70% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:42:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:44:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.7,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:45:27Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:46:00Z",
+    "namespace": "production",
+    "deployment": "payment-service",
+    "action": "scaleUp",
+    "averageCPU": 46.5,
+    "reason": "CPU > 40% for 120 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:46:14Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleUp",
+    "averageCPU": 70.4,
+    "reason": "CPU > 70% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:46:18Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:48:14Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.7,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:48:57Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:49:44Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleUp",
+    "averageCPU": 71.2,
+    "reason": "CPU > 70% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:49:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:51:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.7,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:52:27Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:53:14Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleUp",
+    "averageCPU": 71.3,
+    "reason": "CPU > 70% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:53:18Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:55:14Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.7,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:55:57Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:56:44Z",
+    "namespace": "production",
+    "deployment": "orders-service",
+    "action": "scaleUp",
+    "averageCPU": 70.8,
+    "reason": "CPU > 70% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:56:48Z",
+    "namespace": "production",
+    "deployment": "analytics-service",
+    "action": "scaleUp",
+    "averageCPU": 75.1,
+    "reason": "CPU > 75% for 30 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:57:00Z",
+    "namespace": "production",
+    "deployment": "payment-service",
+    "action": "scaleUp",
+    "averageCPU": 46.3,
+    "reason": "CPU > 40% for 120 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:58:44Z",
+    "namespace": "staging",
+    "deployment": "notification-service",
+    "action": "scaleDown",
+    "averageCPU": 34.7,
+    "reason": "CPU < 40% for 150 seconds"
+  },
+  {
+    "timestamp": "2025-11-04T10:59:27Z",
+    "namespace": "production",
+    "deployment": "inventory-service",
+    "action": "scaleUp",
+    "averageCPU": 65.1,
+    "reason": "CPU > 65% for 30 seconds"
+  }
+]

@@ -1,0 +1,127 @@
+[
+  {
+    "scaleTargetRef": {
+      "name": "orders-service",
+      "namespace": "production"
+    },
+    "pollingInterval": 15,
+    "cooldownPeriod": 210,
+    "triggers": [
+      {
+        "type": "cpu",
+        "metricType": "Utilization",
+        "metadata": {
+          "value": "70"
+        }
+      }
+    ],
+    "behavior": {
+      "scaleUp": {
+        "stabilizationWindowSeconds": 30
+      },
+      "scaleDown": {
+        "stabilizationWindowSeconds": 150
+      }
+    }
+  },
+  {
+    "scaleTargetRef": {
+      "name": "payment-service",
+      "namespace": "production"
+    },
+    "pollingInterval": 15,
+    "cooldownPeriod": 660,
+    "triggers": [
+      {
+        "type": "cpu",
+        "metricType": "Utilization",
+        "metadata": {
+          "value": "40"
+        }
+      }
+    ],
+    "behavior": {
+      "scaleUp": {
+        "stabilizationWindowSeconds": 120
+      },
+      "scaleDown": {
+        "stabilizationWindowSeconds": 600
+      }
+    }
+  },
+  {
+    "scaleTargetRef": {
+      "name": "inventory-service",
+      "namespace": "production"
+    },
+    "pollingInterval": 30,
+    "cooldownPeriod": 210,
+    "triggers": [
+      {
+        "type": "cpu",
+        "metricType": "Utilization",
+        "metadata": {
+          "value": "65"
+        }
+      }
+    ],
+    "behavior": {
+      "scaleUp": {
+        "stabilizationWindowSeconds": 30
+      },
+      "scaleDown": {
+        "stabilizationWindowSeconds": 150
+      }
+    }
+  },
+  {
+    "scaleTargetRef": {
+      "name": "notification-service",
+      "namespace": "staging"
+    },
+    "pollingInterval": 30,
+    "cooldownPeriod": 210,
+    "triggers": [
+      {
+        "type": "cpu",
+        "metricType": "Utilization",
+        "metadata": {
+          "value": "40"
+        }
+      }
+    ],
+    "behavior": {
+      "scaleUp": {
+        "stabilizationWindowSeconds": 30
+      },
+      "scaleDown": {
+        "stabilizationWindowSeconds": 150
+      }
+    }
+  },
+  {
+    "scaleTargetRef": {
+      "name": "analytics-service",
+      "namespace": "production"
+    },
+    "pollingInterval": 30,
+    "cooldownPeriod": 210,
+    "triggers": [
+      {
+        "type": "cpu",
+        "metricType": "Utilization",
+        "metadata": {
+          "value": "75"
+        }
+      }
+    ],
+    "behavior": {
+      "scaleUp": {
+        "stabilizationWindowSeconds": 30
+      },
+      "scaleDown": {
+        "stabilizationWindowSeconds": 150
+      }
+    }
+  }
+]

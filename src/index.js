@@ -8,9 +8,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DESCRIPTION_DIR = path.join(__dirname, '..', 'description');
 
 // ---------------------------------------------------------------------------
-// CPU parsing: "500m" -> 500, "2" -> 2000, "1.316" -> 1316
+// CPU parsing — normalizes all formats to millicores
+// "500m" -> 500,  "2" -> 2000,  "1.316" -> 1316
 // ---------------------------------------------------------------------------
-function parseCpu(raw) {
+function parseCpuToMillicores(raw) {
   if (typeof raw === 'string' && raw.endsWith('m')) {
     return parseFloat(raw.slice(0, -1));
   }
@@ -18,24 +19,28 @@ function parseCpu(raw) {
 }
 
 // ---------------------------------------------------------------------------
-// Policy loader
+// Policy loader — reads policies.json and indexes by "namespace:deployment"
 // ---------------------------------------------------------------------------
 async function loadPolicies(filePath) {
-  const raw = await readFile(filePath, 'utf-8');
-  const policies = JSON.parse(raw);
-  const policyMap = new Map();
-  for (const p of policies) {
-    const key = `${p.scaleTargetRef.namespace}:${p.scaleTargetRef.name}`;
-    policyMap.set(key, {
-      namespace: p.scaleTargetRef.namespace,
-      deployment: p.scaleTargetRef.name,
-      threshold: parseFloat(p.triggers[0].metadata.value),
-      scaleUpWindow: p.behavior.scaleUp.stabilizationWindowSeconds,
-      scaleDownWindow: p.behavior.scaleDown.stabilizationWindowSeconds,
-      cooldownPeriod: p.cooldownPeriod,
+  const fileContent = await readFile(filePath, 'utf-8');
+  const rawPolicies = JSON.parse(fileContent);
+
+  const policyByDeployment = new Map();
+
+  for (const raw of rawPolicies) {
+    const deploymentKey = `${raw.scaleTargetRef.namespace}:${raw.scaleTargetRef.name}`;
+
+    policyByDeployment.set(deploymentKey, {
+      namespace: raw.scaleTargetRef.namespace,
+      deployment: raw.scaleTargetRef.name,
+      cpuThresholdPercent: parseFloat(raw.triggers[0].metadata.value),
+      scaleUpWindowSeconds: raw.behavior.scaleUp.stabilizationWindowSeconds,
+      scaleDownWindowSeconds: raw.behavior.scaleDown.stabilizationWindowSeconds,
+      cooldownSeconds: raw.cooldownPeriod,
     });
   }
-  return policyMap;
+
+  return policyByDeployment;
 }
 
 // ---------------------------------------------------------------------------
@@ -43,101 +48,192 @@ async function loadPolicies(filePath) {
 // ---------------------------------------------------------------------------
 function createDeploymentState() {
   return {
-    pods: new Map(),              // podName -> { cpuUsage, cpuLimit, timestamp }
-    lastAvgCpu: null,             // last computed average CPU utilization %
-    lastAvgTimestamp: null,       // timestamp of last computed average
+    podMetrics: new Map(),         // podName -> { cpuUsage, cpuLimit }
+    lastAvgCpuPercent: null,
+    lastAvgTimestamp: null,
 
-    scaleUpDetectedAt: null,      // timestamp when we first detected avg > threshold
-    scaleDownDetectedAt: null,    // timestamp when we first detected avg < threshold
-    cooldownUntil: null,          // no actions allowed until this timestamp
+    scaleUpDetectedAt: null,       // when avg first crossed above threshold
+    scaleDownDetectedAt: null,     // when avg first crossed below threshold
+    cooldownUntil: null,           // actions blocked until this ISO timestamp
   };
 }
 
 // ---------------------------------------------------------------------------
-// Core: process a completed timestamp for all deployments that had events
+// Compute average CPU utilization % across all known pods in a deployment
 // ---------------------------------------------------------------------------
-function processTimestamp(timestamp, deploymentStates, policyMap, scalingDecisions) {
-  const tsMs = new Date(timestamp).getTime();
+function computeAvgCpuPercent(deploymentState) {
+  const pods = deploymentState.podMetrics;
+  if (pods.size === 0) return null;
 
-  for (const [key, state] of deploymentStates) {
-    const policy = policyMap.get(key);
-    if (!policy) continue;
+  let totalUtilization = 0;
+  for (const [, pod] of pods) {
+    totalUtilization += (pod.cpuUsage / pod.cpuLimit) * 100;
+  }
+  return totalUtilization / pods.size;
+}
 
-    // Compute average CPU utilization across all known pods
-    let totalUtil = 0;
-    let podCount = 0;
-    for (const [, pod] of state.pods) {
-      const util = (pod.cpuUsage / pod.cpuLimit) * 100;
-      totalUtil += util;
-      podCount++;
+// ---------------------------------------------------------------------------
+// Update the detection flags based on where the avg CPU sits vs threshold.
+// This runs every timestamp, even during cooldown, so the "clock" is always
+// accurate for when the condition first appeared.
+// ---------------------------------------------------------------------------
+function updateDetectionFlags(deploymentState, avgCpuPercent, threshold, timestamp) {
+  const aboveThreshold = avgCpuPercent > threshold;
+  const belowThreshold = avgCpuPercent < threshold;
+
+  if (aboveThreshold) {
+    if (deploymentState.scaleUpDetectedAt === null) {
+      deploymentState.scaleUpDetectedAt = timestamp;
     }
-    if (podCount === 0) continue;
-
-    const avgCpu = totalUtil / podCount;
-    state.lastAvgCpu = avgCpu;
-    state.lastAvgTimestamp = timestamp;
-
-    const aboveThreshold = avgCpu > policy.threshold;
-    const belowThreshold = avgCpu < policy.threshold;
-
-    // Update detection timestamps (always, even during cooldown)
-    if (aboveThreshold) {
-      if (state.scaleUpDetectedAt === null) {
-        state.scaleUpDetectedAt = timestamp;
-      }
-      state.scaleDownDetectedAt = null;
-    } else if (belowThreshold) {
-      if (state.scaleDownDetectedAt === null) {
-        state.scaleDownDetectedAt = timestamp;
-      }
-      state.scaleUpDetectedAt = null;
-    } else {
-      state.scaleUpDetectedAt = null;
-      state.scaleDownDetectedAt = null;
+    deploymentState.scaleDownDetectedAt = null;
+  } else if (belowThreshold) {
+    if (deploymentState.scaleDownDetectedAt === null) {
+      deploymentState.scaleDownDetectedAt = timestamp;
     }
+    deploymentState.scaleUpDetectedAt = null;
+  } else {
+    deploymentState.scaleUpDetectedAt = null;
+    deploymentState.scaleDownDetectedAt = null;
+  }
+}
 
-    // Determine if cooldown is still active
-    const inCooldown = state.cooldownUntil !== null && tsMs < new Date(state.cooldownUntil).getTime();
-    if (state.cooldownUntil !== null && tsMs >= new Date(state.cooldownUntil).getTime()) {
-      state.cooldownUntil = null;
-    }
+// ---------------------------------------------------------------------------
+// Check if cooldown has expired. Returns true if still in cooldown.
+// ---------------------------------------------------------------------------
+function isCooldownActive(deploymentState, currentTimeMs) {
+  if (deploymentState.cooldownUntil === null) return false;
 
-    if (inCooldown) continue;
+  if (currentTimeMs < new Date(deploymentState.cooldownUntil).getTime()) {
+    return true;
+  }
 
-    // Check scale-up: stabilization window elapsed since first detection
-    if (state.scaleUpDetectedAt !== null) {
-      const detectedMs = new Date(state.scaleUpDetectedAt).getTime();
-      if (tsMs - detectedMs >= policy.scaleUpWindow * 1000) {
-        scalingDecisions.push({
-          timestamp,
-          namespace: policy.namespace,
-          deployment: policy.deployment,
-          action: 'scaleUp',
-          averageCPU: Math.round(avgCpu * 10) / 10,
-          reason: `CPU > ${policy.threshold}% for ${policy.scaleUpWindow} seconds`,
-        });
-        state.scaleUpDetectedAt = null;
-        state.cooldownUntil = new Date(tsMs + policy.cooldownPeriod * 1000).toISOString();
-      }
-    }
+  deploymentState.cooldownUntil = null;
+  return false;
+}
 
-    // Check scale-down: stabilization window elapsed since first detection
-    if (state.scaleDownDetectedAt !== null) {
-      const detectedMs = new Date(state.scaleDownDetectedAt).getTime();
-      if (tsMs - detectedMs >= policy.scaleDownWindow * 1000) {
-        scalingDecisions.push({
-          timestamp,
-          namespace: policy.namespace,
-          deployment: policy.deployment,
-          action: 'scaleDown',
-          averageCPU: Math.round(avgCpu * 10) / 10,
-          reason: `CPU < ${policy.threshold}% for ${policy.scaleDownWindow} seconds`,
-        });
-        state.scaleDownDetectedAt = null;
-        state.cooldownUntil = new Date(tsMs + policy.cooldownPeriod * 1000).toISOString();
-      }
+// ---------------------------------------------------------------------------
+// Try to emit a scaling action if the stabilization window has elapsed.
+// Returns the action object if emitted, or null.
+// ---------------------------------------------------------------------------
+function tryEmitScalingAction(deploymentState, policy, avgCpuPercent, currentTimestamp, currentTimeMs) {
+  const rounded = Math.round(avgCpuPercent * 10) / 10;
+
+  if (deploymentState.scaleUpDetectedAt !== null) {
+    const elapsedMs = currentTimeMs - new Date(deploymentState.scaleUpDetectedAt).getTime();
+
+    if (elapsedMs >= policy.scaleUpWindowSeconds * 1000) {
+      deploymentState.scaleUpDetectedAt = null;
+      deploymentState.cooldownUntil = new Date(currentTimeMs + policy.cooldownSeconds * 1000).toISOString();
+
+      return {
+        timestamp: currentTimestamp,
+        namespace: policy.namespace,
+        deployment: policy.deployment,
+        action: 'scaleUp',
+        averageCPU: rounded,
+        reason: `CPU > ${policy.cpuThresholdPercent}% for ${policy.scaleUpWindowSeconds} seconds`,
+      };
     }
   }
+
+  if (deploymentState.scaleDownDetectedAt !== null) {
+    const elapsedMs = currentTimeMs - new Date(deploymentState.scaleDownDetectedAt).getTime();
+
+    if (elapsedMs >= policy.scaleDownWindowSeconds * 1000) {
+      deploymentState.scaleDownDetectedAt = null;
+      deploymentState.cooldownUntil = new Date(currentTimeMs + policy.cooldownSeconds * 1000).toISOString();
+
+      return {
+        timestamp: currentTimestamp,
+        namespace: policy.namespace,
+        deployment: policy.deployment,
+        action: 'scaleDown',
+        averageCPU: rounded,
+        reason: `CPU < ${policy.cpuThresholdPercent}% for ${policy.scaleDownWindowSeconds} seconds`,
+      };
+    }
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Evaluate all deployments at a completed timestamp boundary
+// ---------------------------------------------------------------------------
+function evaluateAllDeployments(timestamp, deploymentStates, policyByDeployment, scalingDecisions) {
+  const currentTimeMs = new Date(timestamp).getTime();
+
+  for (const [deploymentKey, deploymentState] of deploymentStates) {
+    const policy = policyByDeployment.get(deploymentKey);
+    if (!policy) continue;
+
+    const avgCpuPercent = computeAvgCpuPercent(deploymentState);
+    if (avgCpuPercent === null) continue;
+
+    deploymentState.lastAvgCpuPercent = avgCpuPercent;
+    deploymentState.lastAvgTimestamp = timestamp;
+
+    updateDetectionFlags(deploymentState, avgCpuPercent, policy.cpuThresholdPercent, timestamp);
+
+    if (isCooldownActive(deploymentState, currentTimeMs)) continue;
+
+    const action = tryEmitScalingAction(deploymentState, policy, avgCpuPercent, timestamp, currentTimeMs);
+    if (action) {
+      scalingDecisions.push(action);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Store a pod metric event into the deployment state
+// ---------------------------------------------------------------------------
+function recordPodMetric(deploymentStates, event) {
+  const deploymentKey = `${event.namespace}:${event.deployment}`;
+
+  let deploymentState = deploymentStates.get(deploymentKey);
+  if (!deploymentState) {
+    deploymentState = createDeploymentState();
+    deploymentStates.set(deploymentKey, deploymentState);
+  }
+
+  deploymentState.podMetrics.set(event.pod, {
+    cpuUsage: parseCpuToMillicores(event.cpuUsage),
+    cpuLimit: parseCpuToMillicores(event.cpuLimit),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Stream events line-by-line, processing each completed timestamp batch
+// ---------------------------------------------------------------------------
+async function processEventStream(eventsPath, deploymentStates, policyByDeployment) {
+  const scalingDecisions = [];
+  let lastTimestamp = null;
+
+  const lineReader = createInterface({
+    input: createReadStream(eventsPath, { encoding: 'utf-8' }),
+    crlfDelay: Infinity,
+  });
+
+  for await (const line of lineReader) {
+    if (!line.trim()) continue;
+
+    const event = JSON.parse(line);
+
+    // Timestamp boundary — evaluate all deployments for the previous timestamp
+    if (lastTimestamp !== null && event.timestamp !== lastTimestamp) {
+      evaluateAllDeployments(lastTimestamp, deploymentStates, policyByDeployment, scalingDecisions);
+    }
+    lastTimestamp = event.timestamp;
+
+    recordPodMetric(deploymentStates, event);
+  }
+
+  // Flush the final timestamp
+  if (lastTimestamp !== null) {
+    evaluateAllDeployments(lastTimestamp, deploymentStates, policyByDeployment, scalingDecisions);
+  }
+
+  return scalingDecisions;
 }
 
 // ---------------------------------------------------------------------------
@@ -148,52 +244,15 @@ async function main() {
   const eventsPath = path.join(DESCRIPTION_DIR, 'events.log');
   const outputPath = path.join(DESCRIPTION_DIR, 'output.json');
 
-  const policyMap = await loadPolicies(policiesPath);
-  console.log(`Loaded ${policyMap.size} policies`);
+  const policyByDeployment = await loadPolicies(policiesPath);
+  console.log(`Loaded ${policyByDeployment.size} policies`);
 
   const deploymentStates = new Map();
-  // Initialize state for each policy
-  for (const key of policyMap.keys()) {
-    deploymentStates.set(key, createDeploymentState());
+  for (const deploymentKey of policyByDeployment.keys()) {
+    deploymentStates.set(deploymentKey, createDeploymentState());
   }
 
-  const scalingDecisions = [];
-  let lastTimestamp = null;
-
-  const rl = createInterface({
-    input: createReadStream(eventsPath, { encoding: 'utf-8' }),
-    crlfDelay: Infinity,
-  });
-
-  for await (const line of rl) {
-    if (!line.trim()) continue;
-
-    const event = JSON.parse(line);
-    const key = `${event.namespace}:${event.deployment}`;
-
-    // When timestamp changes, process the previous timestamp batch
-    if (lastTimestamp !== null && event.timestamp !== lastTimestamp) {
-      processTimestamp(lastTimestamp, deploymentStates, policyMap, scalingDecisions);
-    }
-    lastTimestamp = event.timestamp;
-
-    // Update pod CPU data
-    let state = deploymentStates.get(key);
-    if (!state) {
-      state = createDeploymentState();
-      deploymentStates.set(key, state);
-    }
-    state.pods.set(event.pod, {
-      cpuUsage: parseCpu(event.cpuUsage),
-      cpuLimit: parseCpu(event.cpuLimit),
-      timestamp: event.timestamp,
-    });
-  }
-
-  // Process the final timestamp
-  if (lastTimestamp !== null) {
-    processTimestamp(lastTimestamp, deploymentStates, policyMap, scalingDecisions);
-  }
+  const scalingDecisions = await processEventStream(eventsPath, deploymentStates, policyByDeployment);
 
   await writeFile(outputPath, JSON.stringify(scalingDecisions, null, 2), 'utf-8');
   console.log(`Done. ${scalingDecisions.length} scaling decisions written to ${outputPath}`);
